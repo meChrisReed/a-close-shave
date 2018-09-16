@@ -1,27 +1,30 @@
 // TODO: only import the parts that are needed
-import * as THREE from 'three';
+import * as THREE from 'three'
 
-var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+import injectStats from './inject-stats.js'
+import init from "./scene/init.js"
 
-var renderer = new THREE.WebGLRenderer();
-renderer.setSize(window.innerWidth, window.innerHeight);
+injectStats()
 
-var geometry = new THREE.BoxGeometry(1, 1, 1);
-var material = new THREE.MeshNormalMaterial({
+const {
+  camera,
+  scene,
+  renderer,
+  points
+} = init(THREE)
 
-});
-var cube = new THREE.Mesh(geometry, material);
-scene.add(cube);
+const animate = () =>
+  requestAnimationFrame(animate) && render()
 
-camera.position.z = 5;
+const render = () => {
 
-function animate() {
-  requestAnimationFrame(animate);
-  cube.rotation.x += 0.01;
-  cube.rotation.y += 0.01;
-  renderer.render(scene, camera);
+  const time = Date.now() * 0.001
+
+  points.rotation.x = time * 0.25
+  points.rotation.y = time * 0.5
+
+  renderer.render(scene, camera)
+
 }
-animate();
 
-document.body.appendChild(renderer.domElement);
+animate()
