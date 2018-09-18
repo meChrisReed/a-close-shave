@@ -1,3 +1,5 @@
+import csg from 'three-js-csg'
+
 const trampoline = fn => {
   let result = fn()
   while (typeof result === 'function') {
@@ -10,6 +12,7 @@ const createVoxels = ({
   THREE,
   scene,
 }) => {
+  const ThreeBSP = csg(THREE)
   // const geometry = new THREE.BufferGeometry();
 
   // WARNING: FOR loop mutates i, positions, and colors
@@ -20,10 +23,16 @@ const createVoxels = ({
   const color = new THREE.Color();
   const group = new THREE.Group();
 
-  const voxelSize = 60
+  const voxelSize = 100
 
-  const width = 500
+  const width = 800
   const half = width / 2 // particles spread in the cube
+
+  const sphere = new THREE.Mesh(new THREE.SphereGeometry(400, 10, 10),
+    new THREE.MeshBasicMaterial({
+      color: 0xFFFFFF,
+      wireframe: true
+    }));
 
   const fillAxisRow = (distances = {
     x: 0,
@@ -49,8 +58,18 @@ const createVoxels = ({
       })
       const cube = new THREE.Mesh(geometry, material)
 
-      cube.position.set(x, y, z)
-      group.add(cube)
+      cube.position.set(x - half, y - half, z - half)
+
+      const sBSP = new ThreeBSP(sphere);
+      const bBSP = new ThreeBSP(cube);
+
+      const sub = bBSP.intersect(sBSP);
+      const newMesh = sub.toMesh();
+
+      newMesh.material = material
+
+
+      group.add(newMesh)
       return () => fillAxisRow({
         x: distances.x + voxelSize,
         y: distances.y,
@@ -72,15 +91,11 @@ const createVoxels = ({
   }
 
   trampoline(fillAxisRow)
-  group.applyMatrix(new THREE.Matrix4().makeTranslation(-half, -half, -half));
-
-  const pivot = new THREE.Object3D();
-  pivot.add(group);
-
-  scene.add(pivot);
+  scene.add(group);
+  scene.add(sphere)
 
   return {
-    points: pivot
+    points: group
   }
 }
 
