@@ -8,8 +8,14 @@ const init = (THREE) => {
   camera.position.z = 2750
 
   const scene = new THREE.Scene()
-  scene.background = new THREE.Color(0x050505)
+  scene.background = new THREE.Color(0Xf0f0f0)
   scene.fog = new THREE.Fog(0x050505, 2000, 3500)
+
+  var size = 1000;
+  var divisions = 100;
+
+  var gridHelper = new THREE.GridHelper(size, divisions);
+  scene.add(gridHelper);
 
   const {
     points

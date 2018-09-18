@@ -1,61 +1,86 @@
+const trampoline = fn => {
+  let result = fn()
+  while (typeof result === 'function') {
+
+    result = result()
+  }
+}
+
 const createVoxels = ({
-  particles = 100000,
   THREE,
   scene,
 }) => {
-  const geometry = new THREE.BufferGeometry();
+  // const geometry = new THREE.BufferGeometry();
 
   // WARNING: FOR loop mutates i, positions, and colors
   // required for performance
-  const positions = [];
-  const colors = [];
+  // const positions = [];
+  // const colors = [];
 
   const color = new THREE.Color();
+  const group = new THREE.Group();
 
-  // TODO: convert buffers to geometry
+  const voxelSize = 60
 
-  const n = 700,
-    n2 = n / 2; // particles spread in the cube
+  const width = 500
+  const half = width / 2 // particles spread in the cube
 
-  for (var i = 0; i < particles; i++) {
+  const fillAxisRow = (distances = {
+    x: 0,
+    y: 0,
+    z: 0
+  }) => {
+    if (distances.x < width) {
+      const {
+        x,
+        y,
+        z
+      } = distances
+      const geometry = new THREE.BoxGeometry(voxelSize, voxelSize, voxelSize)
 
-    // positions
+      const vx = (x / width) + 0.5
+      const vy = (y / width) + 0.5
+      const vz = (z / width) + 0.5
 
-    const x = Math.random() * n - n2
-    const y = Math.random() * n - n2
-    const z = Math.random() * n - n2
+      color.setRGB(vx, vy, vz)
+      const material = new THREE.MeshBasicMaterial({
+        color: color,
+        // wireframe: true
+      })
+      const cube = new THREE.Mesh(geometry, material)
 
-    positions.push(x, y, z);
-
-    // colors
-
-    const vx = (x / n) + 0.5;
-    const vy = (y / n) + 0.5;
-    const vz = (z / n) + 0.5;
-
-    color.setRGB(vx, vy, vz);
-
-    colors.push(color.r, color.g, color.b);
-
+      cube.position.set(x, y, z)
+      group.add(cube)
+      return () => fillAxisRow({
+        x: distances.x + voxelSize,
+        y: distances.y,
+        z: distances.z
+      })
+    } else if (distances.y < width) {
+      return () => fillAxisRow({
+        x: 0,
+        y: distances.y + voxelSize,
+        z: distances.z
+      })
+    } else if (distances.z < width) {
+      return () => fillAxisRow({
+        x: 0,
+        y: 0,
+        z: distances.z + voxelSize
+      })
+    }
   }
 
-  geometry.addAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-  geometry.addAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+  trampoline(fillAxisRow)
+  group.applyMatrix(new THREE.Matrix4().makeTranslation(-half, -half, -half));
 
-  geometry.computeBoundingSphere();
+  const pivot = new THREE.Object3D();
+  pivot.add(group);
 
-  //
-
-  const material = new THREE.PointsMaterial({
-    size: 100,
-    vertexColors: THREE.VertexColors
-  });
-
-  const points = new THREE.Points(geometry, material);
-  scene.add(points);
+  scene.add(pivot);
 
   return {
-    points
+    points: pivot
   }
 }
 
