@@ -23,16 +23,36 @@ const createVoxels = ({
   const color = new THREE.Color();
   const group = new THREE.Group();
 
-  const voxelSize = 100
+  const voxelSize = 110
 
   const width = 800
   const half = width / 2 // particles spread in the cube
 
-  const sphere = new THREE.Mesh(new THREE.SphereGeometry(400, 10, 10),
+  const sphere = new THREE.Mesh(new THREE.SphereGeometry(half, 10, 10),
     new THREE.MeshBasicMaterial({
-      color: 0xFFFFFF,
-      wireframe: true
+      // color: 0xFFFFFF,
+      // wireframe: true
+      opacity: 0,
+      transparent: true
     }));
+
+  const plane = new THREE.Mesh(new THREE.PlaneGeometry(width * 1.2, width * 1.2, 2), new THREE.MeshBasicMaterial({
+    color: 0xffff00,
+    side: THREE.DoubleSide,
+    // wireframe: true
+  }));
+
+
+  plane.rotation.x = 200
+  plane.rotation.y = 200
+  plane.position.set(-half / 2, 0, 0)
+
+  scene.add(plane);
+
+  const testCamera = new THREE.PerspectiveCamera(40, window.innerWidth / (window.innerHeight / 2), 1, 1000);
+  testCamera.rotation.x = 200
+  testCamera.rotation.y = 200
+  testCamera.position.set(-half / 2, 0, 0)
 
   const fillAxisRow = (distances = {
     x: 0,
@@ -68,8 +88,28 @@ const createVoxels = ({
 
       newMesh.material = material
 
-
       group.add(newMesh)
+
+      // 
+      cube.updateMatrixWorld();
+      testCamera.updateMatrixWorld();
+      testCamera.updateProjectionMatrix();
+
+      var targetPosition = new THREE.Vector3();
+      targetPosition = targetPosition.setFromMatrixPosition(cube.matrixWorld);
+
+      var lookAt = testCamera.getWorldDirection(new THREE.Vector3(0, 0, 0));
+      var cameraPos = new THREE.Vector3().setFromMatrixPosition(testCamera.matrixWorld);
+      var pos = targetPosition.sub(cameraPos);
+
+      const behind = (pos.angleTo(lookAt)) > (Math.PI / 2);
+
+      if (behind) {
+        cube.material.color.setHex(0x000000)
+      }
+
+      //
+
       return () => fillAxisRow({
         x: distances.x + voxelSize,
         y: distances.y,

@@ -5,17 +5,21 @@ const init = (THREE) => {
 
   // set up the basic scene
   const camera = new THREE.PerspectiveCamera(27, window.innerWidth / window.innerHeight, 5, 3500)
+  camera.position.x = 400;
+  camera.position.y = 400;
   camera.position.z = 2750
 
   const scene = new THREE.Scene()
   scene.background = new THREE.Color(0Xf0f0f0)
   scene.fog = new THREE.Fog(0x050505, 2000, 3500)
 
-  var size = 1000;
-  var divisions = 100;
+  camera.lookAt(scene.position);
 
-  var gridHelper = new THREE.GridHelper(size, divisions);
-  scene.add(gridHelper);
+  var size = 1000;
+  var divisions = 10;
+
+  // var gridHelper = new THREE.GridHelper(size, divisions);
+  // scene.add(gridHelper);
 
   const {
     points
