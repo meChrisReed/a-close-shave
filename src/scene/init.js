@@ -22,7 +22,10 @@ const init = (THREE) => {
   // scene.add(gridHelper);
 
   const {
-    points
+    voxelGroup,
+    testCamera,
+    width,
+    plane
   } = createVoxels({
     THREE,
     scene
@@ -44,7 +47,10 @@ const init = (THREE) => {
     camera,
     scene,
     renderer,
-    points
+    voxelGroup,
+    testCamera,
+    width,
+    plane
   }
 
 }

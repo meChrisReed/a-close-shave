@@ -23,12 +23,12 @@ const createVoxels = ({
   const color = new THREE.Color();
   const group = new THREE.Group();
 
-  const voxelSize = 110
+  const voxelSize = 80
 
   const width = 800
   const half = width / 2 // particles spread in the cube
 
-  const sphere = new THREE.Mesh(new THREE.SphereGeometry(half, 10, 10),
+  const sphere = new THREE.Mesh(new THREE.SphereGeometry(half, 15, 15),
     new THREE.MeshBasicMaterial({
       // color: 0xFFFFFF,
       // wireframe: true
@@ -87,28 +87,9 @@ const createVoxels = ({
       const newMesh = sub.toMesh();
 
       newMesh.material = material
+      newMesh.startPosition = new THREE.Vector3(x - half, y - half, z - half)
 
       group.add(newMesh)
-
-      // 
-      cube.updateMatrixWorld();
-      testCamera.updateMatrixWorld();
-      testCamera.updateProjectionMatrix();
-
-      var targetPosition = new THREE.Vector3();
-      targetPosition = targetPosition.setFromMatrixPosition(cube.matrixWorld);
-
-      var lookAt = testCamera.getWorldDirection(new THREE.Vector3(0, 0, 0));
-      var cameraPos = new THREE.Vector3().setFromMatrixPosition(testCamera.matrixWorld);
-      var pos = targetPosition.sub(cameraPos);
-
-      const behind = (pos.angleTo(lookAt)) > (Math.PI / 2);
-
-      if (behind) {
-        cube.material.color.setHex(0x000000)
-      }
-
-      //
 
       return () => fillAxisRow({
         x: distances.x + voxelSize,
@@ -135,7 +116,10 @@ const createVoxels = ({
   scene.add(sphere)
 
   return {
-    points: group
+    voxelGroup: group,
+    testCamera,
+    plane,
+    width
   }
 }
 
