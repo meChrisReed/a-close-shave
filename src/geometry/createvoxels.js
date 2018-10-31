@@ -21,9 +21,10 @@ const createVoxels = ({
   // const colors = [];
 
   const color = new THREE.Color();
-  const group = new THREE.Group();
+  // const group = new THREE.Group();
+  const voxels = []
 
-  const voxelSize = 80
+  const voxelSize = 200 // 80
 
   const width = 800
   const half = width / 2 // particles spread in the cube
@@ -87,9 +88,15 @@ const createVoxels = ({
       const newMesh = sub.toMesh();
 
       newMesh.material = material
-      newMesh.startPosition = new THREE.Vector3(x - half, y - half, z - half)
 
-      group.add(newMesh)
+      const pivot = new THREE.Group()
+      pivot.add(newMesh)
+      voxels.push({
+        startPosition: new THREE.Vector3(x - half, y - half, z - half),
+        mesh: newMesh,
+        pivot
+      })
+      scene.add(pivot);
 
       return () => fillAxisRow({
         x: distances.x + voxelSize,
@@ -112,11 +119,11 @@ const createVoxels = ({
   }
 
   trampoline(fillAxisRow)
-  scene.add(group);
+  // scene.add(group);
   scene.add(sphere)
 
   return {
-    voxelGroup: group,
+    voxelGroup: voxels,
     testCamera,
     plane,
     width
