@@ -1,5 +1,7 @@
 import csg from 'three-js-csg'
 
+import makTeapot from './test-imports/teapot.js'
+
 const trampoline = fn => {
   let result = fn()
   while (typeof result === 'function') {
@@ -36,6 +38,10 @@ const createVoxels = ({
       opacity: 0,
       transparent: true
     }));
+
+  const teapot = makTeapot({
+    THREE
+  })
 
   const plane = new THREE.Mesh(new THREE.PlaneGeometry(width * 1.2, width * 1.2, 2), new THREE.MeshBasicMaterial({
     color: 0xffff00,
@@ -81,7 +87,7 @@ const createVoxels = ({
 
       cube.position.set(x - half, y - half, z - half)
 
-      const sBSP = new ThreeBSP(sphere);
+      const sBSP = new ThreeBSP(teapot); // was `const sBSP = new ThreeBSP(sphere);`
       const bBSP = new ThreeBSP(cube);
 
       const sub = bBSP.intersect(sBSP);
