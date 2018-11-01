@@ -1,4 +1,5 @@
-import csg from 'three-js-csg'
+// import csg from 'three-js-csg'
+import csg from '../../replace-modules/three-js-csg/index.js'
 
 import makTeapot from './test-imports/teapot.js'
 
@@ -26,7 +27,7 @@ const createVoxels = ({
   // const group = new THREE.Group();
   const voxels = []
 
-  const voxelSize = 200 // 80
+  const voxelSize = 200 // 40 // 200
 
   const width = 800
   const half = width / 2 // particles spread in the cube
@@ -40,8 +41,12 @@ const createVoxels = ({
     }));
 
   const teapot = makTeapot({
-    THREE
+    THREE,
+    size: width /4,
+    segments: 3
   })
+
+  // scene.add(teapot)
 
   const plane = new THREE.Mesh(new THREE.PlaneGeometry(width * 1.2, width * 1.2, 2), new THREE.MeshBasicMaterial({
     color: 0xffff00,
@@ -87,7 +92,8 @@ const createVoxels = ({
 
       cube.position.set(x - half, y - half, z - half)
 
-      const sBSP = new ThreeBSP(teapot); // was `const sBSP = new ThreeBSP(sphere);`
+      // const sBSP = new ThreeBSP(teapot);
+      const sBSP = new ThreeBSP(sphere);
       const bBSP = new ThreeBSP(cube);
 
       const sub = bBSP.intersect(sBSP);
@@ -96,13 +102,20 @@ const createVoxels = ({
       newMesh.material = material
 
       const pivot = new THREE.Group()
-      pivot.add(newMesh)
-      voxels.push({
-        startPosition: new THREE.Vector3(x - half, y - half, z - half),
-        mesh: newMesh,
-        pivot
-      })
-      scene.add(pivot);
+      
+      var box = new THREE.Box3().setFromObject( newMesh );
+      
+      // If it is completely not in the shape area, don't put it in the array
+      if (box.min.x !== -Infinity && box.min.x !== Infinity) {
+        voxels.push({
+          startPosition: new THREE.Vector3(x - half, y - half, z - half),
+          mesh: newMesh,
+          pivot
+        })
+        pivot.add(newMesh)
+        scene.add(pivot);
+      }
+      
 
       return () => fillAxisRow({
         x: distances.x + voxelSize,

@@ -1,7 +1,8 @@
 {
-  "name": "shave",
+  "name": "a-close-shave",
   "version": "1.0.0",
-  "description": "",
+  "description": "a tech demo for cutting solids into voxels",
+  "repository": "https://github.com/meChrisReed/a-close-shave",
   "main": "index.js",
   "scripts": {
     "start": "webpack-dev-server --mode development --open",
