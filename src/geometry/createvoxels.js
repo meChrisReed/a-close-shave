@@ -1,14 +1,21 @@
-// import csg from 'three-js-csg'
+// TODO: Save the meshes after intersection to a file
 import csg from '../../replace-modules/three-js-csg/index.js'
 
 import makTeapot from './test-imports/teapot.js'
 
+// `trampoline` is an optimization to prevent stack overflows while using recursion on large sets
 const trampoline = fn => {
   let result = fn()
   while (typeof result === 'function') {
-
     result = result()
   }
+}
+
+// `parameters` the initial input to generate the voxel field
+const parameters = {
+  // for the teapot demo use 2 | 3 segments and 40 voxel size
+  voxelSize: 40, // 40 // 200
+  width: 800
 }
 
 const createVoxels = ({
@@ -16,23 +23,19 @@ const createVoxels = ({
   scene,
 }) => {
   const ThreeBSP = csg(THREE)
-  // const geometry = new THREE.BufferGeometry();
-
-  // WARNING: FOR loop mutates i, positions, and colors
-  // required for performance
-  // const positions = [];
-  // const colors = [];
-
+  // `color` will be used in each mesh material
   const color = new THREE.Color();
-  // const group = new THREE.Group();
+
+  // `voxels` will be used to store the voxels, pivots, and other details on a per voxel level
+  // { mesh, pivot, drop, startPosition }
   const voxels = []
 
-  const voxelSize = 200 // 40 // 200
+  // for the teapot demo use 2 | 3 segments and 40 voxel size
+  const { voxelSize, width } = parameters
+  const half = width / 2
 
-  const width = 800
-  const half = width / 2 // particles spread in the cube
-
-  const sphere = new THREE.Mesh(new THREE.SphereGeometry(half, 15, 15),
+  // `sphere` is a temporary mesh to intersect with the voxel group
+  const sphere = new THREE.Mesh(new THREE.SphereGeometry(half, 30, 30),
     new THREE.MeshBasicMaterial({
       // color: 0xFFFFFF,
       // wireframe: true
@@ -40,43 +43,52 @@ const createVoxels = ({
       transparent: true
     }));
 
+  // `teapot` is a temporary mesh to intersect with the voxel group
+  // This mesh is based on a BufferGeometry and is much more complex than the sphere
   const teapot = makTeapot({
     THREE,
     size: width /4,
     segments: 3
   })
+  // scene.add(teapot) // if you need to see the teapot
 
-  // scene.add(teapot)
-
+  // `plane` the plane that will cut the voxel group
   const plane = new THREE.Mesh(new THREE.PlaneGeometry(width * 1.2, width * 1.2, 2), new THREE.MeshBasicMaterial({
     color: 0xffff00,
     side: THREE.DoubleSide,
     // wireframe: true
   }));
-
-
+  // initial plane values
   plane.rotation.x = 200
   plane.rotation.y = 200
   plane.position.set(-half / 2, 0, 0)
-
   scene.add(plane);
 
+  // `testCamera` will be used to test the position of a voxel relative to the center of the stage
   const testCamera = new THREE.PerspectiveCamera(40, window.innerWidth / (window.innerHeight / 2), 1, 1000);
   testCamera.rotation.x = 200
   testCamera.rotation.y = 200
   testCamera.position.set(-half / 2, 0, 0)
 
+  // `counter` the count of voxels placed
+  let counter = 0
+  // `total` the number of voxels to place
+  const total = Math.floor(width/voxelSize) ** 3
+
+  // fills out a cube with voxels
+  // uses a basic recursive traversal pattern
+  // iterates along the x axis placing voxels until it has reached a distance
+  // then increment the axis position
   const fillAxisRow = (distances = {
     x: 0,
     y: 0,
     z: 0
   }) => {
+    // this table of if statements will change the axis to iterate
     if (distances.x < width) {
-      const {
-        x,
-        y,
-        z
-      } = distances
+      counter += 1
+      console.log(`placing ${counter} of ${total}`)
+      const { x, y, z } = distances
       const geometry = new THREE.BoxGeometry(voxelSize, voxelSize, voxelSize)
 
       const vx = (x / width) + 0.5
@@ -116,7 +128,7 @@ const createVoxels = ({
         scene.add(pivot);
       }
       
-
+      // must return a function to trampoline
       return () => fillAxisRow({
         x: distances.x + voxelSize,
         y: distances.y,
@@ -138,9 +150,8 @@ const createVoxels = ({
   }
 
   trampoline(fillAxisRow)
-  // scene.add(group);
-  scene.add(sphere)
 
+  // return values required to calculate animation
   return {
     voxelGroup: voxels,
     testCamera,

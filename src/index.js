@@ -86,18 +86,15 @@ const render = () => {
     if (cube.drop) {
       cube.pivot.position.y -= 5
       if (
-        cube.pivot.position.x <= cube.startPosition.y - 500 ||
-        cube.pivot.position.x >= cube.startPosition.y + 500 ||
-        cube.pivot.position.y <= cube.startPosition.y - 500 ||
-        cube.pivot.position.y >= cube.startPosition.y + 500 ||
-        cube.pivot.position.z <= cube.startPosition.y - 500 ||
-        cube.pivot.position.z >= cube.startPosition.y + 500
+        cube.pivot.position.x <= cube.startPosition.y - 1000 ||
+        cube.pivot.position.x >= cube.startPosition.y + 1000 ||
+        cube.pivot.position.y <= cube.startPosition.y - 1000 ||
+        cube.pivot.position.y >= cube.startPosition.y + 1000 ||
+        cube.pivot.position.z <= cube.startPosition.y - 1000 ||
+        cube.pivot.position.z >= cube.startPosition.y + 1000
       ) {
         cube.drop = false
         cube.pivot.position.set(0, 0, 0)
-        // reset the mesh rotation
-        cube.mesh.rotation.x = 0
-        cube.mesh.rotation.y = 0
       }
     }
   }

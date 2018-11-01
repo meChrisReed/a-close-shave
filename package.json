@@ -1,7 +1,7 @@
 {
   "name": "a-close-shave",
   "version": "1.0.0",
-  "description": "a tech demo for cutting solids into voxels",
+  "description": "a tech demo for cutting solids into voxels. previously used three-js-csg",
   "repository": "https://github.com/meChrisReed/a-close-shave",
   "main": "index.js",
   "scripts": {
@@ -23,7 +23,6 @@
     "webpack-dev-server": "^3.1.8"
   },
   "dependencies": {
-    "three": "^0.96.0",
-    "three-js-csg": "^72.0.0"
+    "three": "^0.96.0"
   }
 }
