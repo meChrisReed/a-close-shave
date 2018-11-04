@@ -1,7 +1,7 @@
 import onWindowResize from "./onWindowResize.js"
 import createVoxels from "../geometry/createvoxels.js"
 
-const init = (THREE) => {
+const init = async THREE => {
 
   // set up the basic scene
   const camera = new THREE.PerspectiveCamera(27, window.innerWidth / window.innerHeight, 5, 3500)
@@ -25,8 +25,9 @@ const init = (THREE) => {
     voxelGroup,
     testCamera,
     width,
-    plane
-  } = createVoxels({
+    plane,
+    head
+  } = await createVoxels({
     THREE,
     scene
   })
@@ -50,7 +51,8 @@ const init = (THREE) => {
     voxelGroup,
     testCamera,
     width,
-    plane
+    plane,
+    head
   }
 
 }
